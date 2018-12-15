@@ -1,0 +1,53 @@
+#!/usr/bin/python3
+
+import os
+import glob
+import argparse
+
+parser=argparse.ArgumentParser()
+parser.add_argument('type',choices=['down','up'])
+parser.add_argument('--tf-version',type=str,default='1.12.0')
+args=parser.parse_args()
+change=args.type
+base_dir='/home/xyez/.local/'
+tf_dir='lib/python3.5/site-packages'
+tf_version=args.tf_version
+tf_version_dir='tensorflow'+'_'+tf_version
+down_dir_bin=os.path.join(base_dir,tf_dir,'versions_tensorflow',tf_version_dir,'bin')
+down_dir_lib=os.path.join(base_dir,tf_dir,'versions_tensorflow',tf_version_dir,'lib')
+up_dir_bin=os.path.join(base_dir,'bin')
+up_dir_lib=os.path.join(base_dir,tf_dir)
+
+err_flag=False
+if change=='up':
+  cmds=['ln -s '+ os.path.join(down_dir_lib,file)+' '+os.path.join(up_dir_lib,file) for file in os.listdir(down_dir_lib)]
+  cmds+=['ln -s '+ os.path.join(down_dir_bin,file)+' '+os.path.join(up_dir_bin,file) for file in os.listdir(down_dir_bin)]
+  for cmd in cmds:
+    value=os.system(cmd)
+    if value:
+      err_flag=True
+
+
+if change=='down':
+  if os.path.exists(down_dir_lib):
+    cmds = ['rm ' + os.path.join(up_dir_lib, file) for file in os.listdir(down_dir_lib)]
+    cmds += ['rm ' + os.path.join(up_dir_bin, file) for file in os.listdir(down_dir_bin)]
+    for cmd in cmds:
+      value=os.system(cmd)
+      if value:
+        err_flag = True
+  else:
+    os.makedirs(down_dir_bin)
+    os.makedirs(down_dir_lib)
+    cmds = ['mv ' + os.path.join(up_dir_lib, file) + ' ' + os.path.join(down_dir_lib, file) for file in glob.glob(up_dir_lib+'/tensor*')]
+    cmds += ['mv ' + os.path.join(up_dir_bin, file) + ' ' + os.path.join(down_dir_bin, file) for file in glob.glob(up_dir_bin+'/tensor*')]
+    for cmd in cmds:
+      value=os.system(cmd)
+      if value:
+        err_flag = True
+
+if err_flag:
+  print("There is an error!!!!! and failed")
+else:
+  print("Action "+change+" is over.")
+
