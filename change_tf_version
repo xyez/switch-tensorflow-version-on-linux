@@ -29,18 +29,18 @@ if change=='up':
 
 
 if change=='down':
-  if os.path.exists(down_dir_lib):
-    cmds = ['rm ' + os.path.join(up_dir_lib, file) for file in os.listdir(down_dir_lib)]
-    cmds += ['rm ' + os.path.join(up_dir_bin, file) for file in os.listdir(down_dir_bin)]
+  if os.listdir(down_dir_lib) != []:
+    cmds = ['rm -rI ' + os.path.join(up_dir_lib, file) for file in os.listdir(down_dir_lib)]
+    cmds += ['rm -rI ' + os.path.join(up_dir_bin, file) for file in os.listdir(down_dir_bin)]
     for cmd in cmds:
       value=os.system(cmd)
       if value:
         err_flag = True
   else:
-    os.makedirs(down_dir_bin)
-    os.makedirs(down_dir_lib)
-    cmds = ['mv ' + os.path.join(up_dir_lib, file) + ' ' + os.path.join(down_dir_lib, file) for file in glob.glob(up_dir_lib+'/tensor*')]
-    cmds += ['mv ' + os.path.join(up_dir_bin, file) + ' ' + os.path.join(down_dir_bin, file) for file in glob.glob(up_dir_bin+'/tensor*')]
+    os.makedirs(down_dir_bin,exist_ok=True)
+    os.makedirs(down_dir_lib,exist_ok=True)
+    cmds = ['mv ' + os.path.join(up_dir_lib, file.split('/')[-1]) + ' ' + os.path.join(down_dir_lib, file.split('/')[-1]) for file in glob.glob(up_dir_lib+'/tensor*')]
+    cmds += ['mv ' + os.path.join(up_dir_bin, file.split('/')[-1]) + ' ' + os.path.join(down_dir_bin, file.split('/')[-1]) for file in glob.glob(up_dir_bin+'/tensor*')]
     for cmd in cmds:
       value=os.system(cmd)
       if value:
